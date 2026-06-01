@@ -1,0 +1,7 @@
+{
+  "framework": "nextjs",
+  "functions": {
+    "app/api/sav/route.ts": { "maxDuration": 60 },
+    "app/api/rapports/route.ts": { "maxDuration": 60 }
+  }
+}
