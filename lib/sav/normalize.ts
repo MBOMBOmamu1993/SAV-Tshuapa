@@ -85,21 +85,32 @@ export function normalizePlan(parents: RawRow[], sessions: RawRow[]): PlanRecord
   }
   return parents.map((p) => {
     const uu = s(p["_uuid"]) ?? "";
-    const sess = (by.get(uu) ?? []).map((c) => ({
-      n: n(c["N°"]), date: s(c["Date prévue pour la session"]), type: s(c["Type de session"]),
-      lieu: s(c["Nom du lieu ou du site où la session sera implantée"]),
-      attendus: n(c["Nombre total d’enfants attendus"]),
-      equipe: s(c["Noms des membres de l’équipe de vaccination"]),
-    }));
+    const sess = (by.get(uu) ?? []).map((c) => {
+      // « Autre » renvoie au champ de précision (souvent « Fixe »).
+      const rawType = s(c["Type de session"]);
+      const autre = s(c["Préciser l’autre type de session"]);
+      const type = rawType && rawType.toLowerCase().includes("autre") && autre ? autre : rawType;
+      return {
+        n: n(c["N°"]), date: s(c["Date prévue pour la session"]), type,
+        lieu: s(c["Nom du lieu ou du site où la session sera implantée"]),
+        attendus: n(c["Nombre total d’enfants attendus"]),
+        equipe: s(c["Noms des membres de l’équipe de vaccination"]),
+      };
+    });
+    // Repli sur la sous-feuille « sessions » si les totaux parents (champs
+    // calculés Kobo) sont absents — garantit des chiffres ≠ 0 sur le live.
+    const subAvancees = sess.filter((x) => (x.type ?? "").toLowerCase().includes("avanc")).length;
+    const subMobiles = sess.filter((x) => (x.type ?? "").toLowerCase().includes("mobile")).length;
+    const subAttendus = sess.reduce((a, x) => a + x.attendus, 0);
     const date = s(p["today"]);
     return {
       province: s(p["Province"]), antenne: s(p["Antenne PEV"]),
       zone: s(p["Zone de santé"]), aire: s(p["Aire de santé"]),
       date, month: monthOf(date),
-      sessionsPlan: n(p["total_sessions_planifiees"]),
-      attendus: n(p["total_enfants_attendus"]),
-      avancees: n(p["total_sessions_avancees"]),
-      mobiles: n(p["total_sessions_mobiles"]),
+      sessionsPlan: n(p["total_sessions_planifiees"]) || sess.length,
+      attendus: n(p["total_enfants_attendus"]) || subAttendus,
+      avancees: n(p["total_sessions_avancees"]) || subAvancees,
+      mobiles: n(p["total_sessions_mobiles"]) || subMobiles,
       sessions: sess,
     };
   });
