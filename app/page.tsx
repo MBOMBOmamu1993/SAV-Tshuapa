@@ -62,10 +62,10 @@ export default function SynthesePage() {
             <section>
               <SectionBar icon="bars">Synthèse exécutive — vue d'ensemble</SectionBar>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-                <KpiCard icon="child" tone="navy" label="Enfants identifiés" value={fmtNum(k.identifies)} sub="Au niveau des centres de santé" />
+                <KpiCard icon="child" tone="brand" label="Enfants identifiés" value={fmtNum(k.identifies)} sub="Au niveau des centres de santé" />
                 <KpiCard icon="syringe" tone="good" label="Doses récupérées" value={fmtNum(k.vaccines)} sub="Doses administrées (récupération)" />
-                <KpiCard icon="up" tone="brand" label="Taux de récupération" value={pctTxt(k.tauxRecuperation)} sub="Doses récup. / doses manquées" />
-                <KpiCard icon="alert" tone={k.airesSansProgramme > 0 ? "bad" : "good"} label="AS non planifiées" value={fmtNum(k.airesSansProgramme)} sub={`sur ${k.airesTotal} aires de santé`} />
+                <KpiCard icon="recovery" tone="violet" label="Taux de récupération" value={pctTxt(k.tauxRecuperation)} sub="Doses récup. / doses manquées" />
+                <KpiCard icon="clinicX" tone={k.airesSansProgramme > 0 ? "bad" : "good"} label="AS non planifiées" value={fmtNum(k.airesSansProgramme)} sub={`sur ${k.airesTotal} aires de santé`} />
               </div>
             </section>
 
@@ -73,16 +73,16 @@ export default function SynthesePage() {
             <section>
               <SectionBar icon="component">Indicateurs clés de la récupération</SectionBar>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-                <KpiCard icon="person" tone="bad" label="Enfants zéro dose" value={fmtNum(k.zeroDose)} sub="PENTA 1 non reçu" />
-                <KpiCard icon="people" tone="warn" label="Enfants sous-vaccinés" value={fmtNum(k.sousVaccines)} sub="PENTA 3 non reçu, PENTA 1 reçu" />
+                <KpiCard icon="zeroDose" tone="bad" label="Enfants zéro dose" value={fmtNum(k.zeroDose)} sub="PENTA 1 non reçu" />
+                <KpiCard icon="shield" tone="warn" label="Enfants sous-vaccinés" value={fmtNum(k.sousVaccines)} sub="PENTA 3 non reçu, PENTA 1 reçu" />
                 <KpiCard icon="syringe" tone="violet" label="Doses manquées" value={fmtNum(k.dosesManquees)} sub="Toutes valences confondues" />
-                <KpiCard icon="people" tone="teal" label="Identifiés par les relais" value={fmtNum(k.identifiesRelais)} sub="Recherche communautaire" />
+                <KpiCard icon="relais" tone="teal" label="Identifiés par les relais" value={fmtNum(k.identifiesRelais)} sub="Recherche communautaire" />
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 mt-2.5">
                 <KpiCard icon="calendar" tone="navy" label="Sessions planifiées" value={fmtNum(k.sessionsPlan)} sub="Toutes aires de santé" />
-                <KpiCard icon="child" tone="brand" label="Enfants attendus" value={fmtNum(k.attendus)} sub="Cible de la planification" />
-                <KpiCard icon="scale" tone="violet" label="Ratio attendus / identifiés" value={pctTxt(k.ratioAttendus)} sub="Cohérence planification" />
-                <KpiCard icon="clinic" tone="good" label="AS avec programme" value={`${k.airesPlanifiees}/${k.airesTotal}`} sub={`${pctTxt(d.planif.proportionAvecProgramme)} couvertes`} />
+                <KpiCard icon="target" tone="brand" label="Enfants attendus" value={fmtNum(k.attendus)} sub="Cible de la planification" />
+                <KpiCard icon="percent" tone="violet" label="Ratio attendus / identifiés" value={pctTxt(k.ratioAttendus)} sub="Cohérence planification" />
+                <KpiCard icon="clinicCheck" tone="good" label="AS avec programme" value={`${k.airesPlanifiees}/${k.airesTotal}`} sub={`${pctTxt(d.planif.proportionAvecProgramme)} couvertes`} />
               </div>
             </section>
 

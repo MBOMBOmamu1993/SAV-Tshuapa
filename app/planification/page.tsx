@@ -19,10 +19,10 @@ export default function PlanificationPage() {
             <section>
               <SectionBar icon="calendar">Couverture de la planification</SectionBar>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-                <KpiCard icon="clinic" tone={sans.length ? "warn" : "good"} label="AS avec programme" value={`${avec.length}/${p.aires.length}`} sub={`${fmtPct(p.proportionAvecProgramme)} couvertes`} />
-                <KpiCard icon="alert" tone={sans.length ? "bad" : "good"} label="AS sans programme" value={fmtNum(sans.length)} sub="À planifier en priorité" />
-                <KpiCard icon="calendar" tone="navy" label="Sessions planifiées" value={fmtNum(p.totalSessions)} sub="Tous types confondus" />
-                <KpiCard icon="child" tone="brand" label="Enfants attendus" value={fmtNum(p.totalAttendus)} sub="Cible de récupération" />
+                <KpiCard icon="clinicCheck" tone="navy" label="Total aires de santé" value={fmtNum(p.aires.length)} sub="Couvertes par le SAV" />
+                <KpiCard icon="clinicCheck" tone="good" label="AS avec programme" value={fmtNum(avec.length)} sub="Programme de vaccination" />
+                <KpiCard icon="clinicX" tone={sans.length ? "warn" : "good"} label="AS sans programme" value={fmtNum(sans.length)} sub="À planifier en priorité" />
+                <KpiCard icon="percent" tone="violet" label="Proportion avec programme" value={fmtPct(p.proportionAvecProgramme)} sub={`${avec.length} / ${p.aires.length} aires`} />
               </div>
             </section>
 
@@ -47,12 +47,15 @@ export default function PlanificationPage() {
                 <table className="dtable">
                   <thead><tr><th className="name">Type de session</th><th>Nombre</th></tr></thead>
                   <tbody>
-                    <tr><td className="name">Fixe</td><td>{p.sessionsParType.fixe}</td></tr>
                     <tr><td className="name">Avancée</td><td>{p.sessionsParType.avancee}</td></tr>
+                    <tr><td className="name">Fixe</td><td>{p.sessionsParType.fixe}</td></tr>
                     <tr><td className="name">Mobile</td><td>{p.sessionsParType.mobile}</td></tr>
                   </tbody>
                   <tfoot><tr><td className="name">Total</td><td>{p.totalSessions}</td></tr></tfoot>
                 </table>
+                <div className="mt-2 text-[11.5px] text-surface-700">
+                  Types issus de la sous-feuille « sessions » (Avancée / Fixe / Mobile), agrégés après déduplication des formulaires.
+                </div>
               </Card>
             </section>
 
@@ -80,6 +83,36 @@ export default function PlanificationPage() {
                           <td style={{ fontWeight: 700, color: tauxColor(a.ratio) }}>{a.ratio === null ? "—" : `${a.ratio}%`}</td>
                         </tr>
                       ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </section>
+
+            <section>
+              <SectionBar icon="clipboard">Programme de vaccination par aire de santé — détail des sessions</SectionBar>
+              <Card>
+                <div className="overflow-x-auto">
+                  <table className="dtable">
+                    <thead>
+                      <tr>
+                        <th>N°</th><th className="name">Aire de santé</th><th>Date prévue</th>
+                        <th>Type</th><th>Site d'implantation</th><th>Enfants attendus</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {p.sessionDetails.length ? p.sessionDetails.map((sdet, i) => (
+                        <tr key={`${sdet.aire}-${sdet.n}-${i}`}>
+                          <td>{sdet.n || i + 1}</td>
+                          <td className="name">{sdet.aire}</td>
+                          <td>{sdet.date ?? "—"}</td>
+                          <td>{sdet.typeLabel}</td>
+                          <td>{sdet.lieu ?? "—"}</td>
+                          <td>{sdet.attendus || "—"}</td>
+                        </tr>
+                      )) : (
+                        <tr><td className="name" colSpan={6}>Aucune session détaillée disponible.</td></tr>
+                      )}
                     </tbody>
                   </table>
                 </div>

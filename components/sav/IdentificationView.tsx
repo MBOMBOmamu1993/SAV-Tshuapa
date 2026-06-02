@@ -51,9 +51,9 @@ export function IdentificationView({
       <section>
         <SectionBar icon="child">Enfants manqués identifiés — {acteurs}</SectionBar>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-          <KpiCard icon="child" tone="navy" label="Enfants identifiés" value={fmtNum(tot.id)} sub={geoNote} />
-          <KpiCard icon="person" tone="bad" label="Zéro dose" value={fmtNum(tot.zero)} sub="PENTA 1 non reçu" />
-          <KpiCard icon="people" tone="warn" label="Sous-vaccinés" value={fmtNum(tot.sous)} sub="PENTA 3 non reçu" />
+          <KpiCard icon="child" tone="brand" label="Enfants identifiés" value={fmtNum(tot.id)} sub={geoNote} />
+          <KpiCard icon="zeroDose" tone="bad" label="Zéro dose" value={fmtNum(tot.zero)} sub="PENTA 1 non reçu" />
+          <KpiCard icon="shield" tone="warn" label="Sous-vaccinés" value={fmtNum(tot.sous)} sub="PENTA 3 non reçu" />
           <KpiCard icon="syringe" tone="violet" label="Doses manquées" value={fmtNum(tot.doses)} sub="Toutes valences" />
         </div>
       </section>

@@ -14,9 +14,9 @@ export default function IdentificationRelaisPage() {
           <section>
             <SectionBar icon="people">Recherche active communautaire</SectionBar>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
-              <KpiCard icon="hand" tone="teal" label="Relais actifs" value={fmtNum(d.relais.relaisActifs)} sub="Ayant soumis une fiche" />
+              <KpiCard icon="relais" tone="teal" label="Relais actifs" value={fmtNum(d.relais.relaisActifs)} sub="Ayant soumis une fiche" />
               <KpiCard icon="child" tone="navy" label="Enfants identifiés (relais)" value={fmtNum(d.relais.byZone.reduce((a, r) => a + r.identifies, 0))} sub="Dans la communauté" />
-              <KpiCard icon="map" tone="brand" label="Aires couvertes (relais)" value={fmtNum(d.relais.byAire.length)} sub="Au moins une fiche relais" />
+              <KpiCard icon="pin" tone="brand" label="Aires couvertes (relais)" value={fmtNum(d.relais.byAire.length)} sub="Au moins une fiche relais" />
             </div>
           </section>
           <IdentificationView data={d.relais} source="relais" geoNote="Formulaire relais — communauté" />

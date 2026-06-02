@@ -34,9 +34,9 @@ function ResultsBody({ d }: { d: SavBundle }) {
         <SectionBar icon="syringe">Résultats de la récupération des enfants</SectionBar>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
           <KpiCard icon="syringe" tone="good" label="Doses récupérées" value={fmtNum(r.totalVaccines)} sub="Doses administrées" />
-          <KpiCard icon="up" tone="brand" label="Taux de récupération global" value={fmtPct(d.kpi.tauxRecuperation)} sub="Doses récup. / doses manquées" />
-          <KpiCard icon="child" tone="navy" label="Doses 0–11 mois" value={fmtNum(r.parTranche["0-11"])} sub="Tranche prioritaire" />
-          <KpiCard icon="people" tone="violet" label="Doses 12–59 mois" value={fmtNum(r.parTranche["12-23"] + r.parTranche["24-59"])} sub="Rattrapage" />
+          <KpiCard icon="child" tone="brand" label="Doses 0–11 mois" value={fmtNum(r.parTranche["0-11"])} sub="Tranche prioritaire" />
+          <KpiCard icon="childCheck" tone="violet" label="Doses 12–23 mois" value={fmtNum(r.parTranche["12-23"])} sub="Rattrapage" />
+          <KpiCard icon="recovery" tone="teal" label="Doses 24–59 mois" value={fmtNum(r.parTranche["24-59"])} sub="Rattrapage tardif" />
         </div>
       </section>
 
