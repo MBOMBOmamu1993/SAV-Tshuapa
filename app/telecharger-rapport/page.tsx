@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { SectionBar } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
+import { SavIcon } from "@/components/ui/SavIcon";
 import { useSav } from "@/lib/client/api";
 import { useFilters, filtersToQuery } from "@/lib/state/filters";
 import { fmtNum, fmtPct } from "@/lib/client/format";
@@ -69,9 +70,7 @@ export default function TelechargerRapportPage() {
   return (
     <div className="space-y-4">
       <div className="card card-pad flex items-center gap-3" style={{ background: "linear-gradient(90deg,#e7ecf6,#fff)" }}>
-        <span className="w-9 h-9 rounded-[10px] flex items-center justify-center text-white shrink-0" style={{ background: "linear-gradient(145deg,#0a3a86,#00205c)" }}>
-          <Icon name="report" className="w-5 h-5" />
-        </span>
+        <SavIcon name="report" solid="#00205c" soft="#cdd9ee" className="w-11 h-11 shrink-0 drop-shadow-[0_6px_14px_rgba(0,0,0,0.12)]" />
         <div className="flex-1">
           <div className="text-[14px] font-extrabold text-navy-700">Rapport automatique SAV — Récupération des enfants</div>
           <div className="text-[11.5px] text-surface-700">Présentation PowerPoint enrichie (graphiques épurés, commentaires « Lecture PEV », logos OMS &amp; PEV) — générée à partir des données filtrées du tableau de bord.</div>
@@ -82,9 +81,7 @@ export default function TelechargerRapportPage() {
 
       <div className="card card-pad">
         <div className="flex items-start gap-3">
-          <span className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white shrink-0" style={{ background: "linear-gradient(145deg,#36b3ec,#0093d5)" }}>
-            <Icon name="syringe" className="w-5 h-5" />
-          </span>
+          <SavIcon name="syringe" solid="#0093d5" soft="#cfe9f8" className="w-12 h-12 shrink-0 drop-shadow-[0_6px_14px_rgba(0,0,0,0.12)]" />
           <div className="min-w-0">
             <div className="text-[13px] font-bold leading-snug text-navy-700">Rapport automatique SAV — Tshuapa</div>
             <div className="mt-1 text-[11px] leading-snug text-surface-600">
