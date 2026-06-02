@@ -52,9 +52,30 @@ export default function SynthesePage() {
       {(d) => {
         const k = d.kpi;
         const alerts = [
-          { sit: "Récupération faible", seuil: `< ${ALERT_THRESHOLDS.recuperationFaible} %`, val: pctTxt(k.tauxRecuperation), action: "Microplan de rattrapage ciblé", bad: (k.tauxRecuperation ?? 100) < ALERT_THRESHOLDS.recuperationFaible },
-          { sit: "Planification insuffisante", seuil: `< ${ALERT_THRESHOLDS.planificationInsuffisante} % des identifiés`, val: pctTxt(k.ratioAttendus), action: "Ajouter sessions avancées / mobiles", bad: (k.ratioAttendus ?? 100) < ALERT_THRESHOLDS.planificationInsuffisante },
-          { sit: "AS sans programme", seuil: "≥ 1", val: fmtNum(k.airesSansProgramme), action: "Planifier immédiatement", bad: k.airesSansProgramme > 0 },
+          {
+            sit: "Récupération faible",
+            seuil: `< ${ALERT_THRESHOLDS.recuperationFaible} %`,
+            val: pctTxt(k.tauxRecuperation),
+            bad: (k.tauxRecuperation ?? 100) < ALERT_THRESHOLDS.recuperationFaible,
+            actionBad: "Microplan de rattrapage ciblé",
+            actionOk: "Objectif atteint — maintenir le suivi",
+          },
+          {
+            sit: "Planification insuffisante",
+            seuil: `< ${ALERT_THRESHOLDS.planificationInsuffisante} % des identifiés`,
+            val: pctTxt(k.ratioAttendus),
+            bad: (k.ratioAttendus ?? 100) < ALERT_THRESHOLDS.planificationInsuffisante,
+            actionBad: "Ajouter sessions avancées / mobiles",
+            actionOk: "Couverture suffisante — rien à signaler",
+          },
+          {
+            sit: "AS sans programme",
+            seuil: "≥ 1",
+            val: fmtNum(k.airesSansProgramme),
+            bad: k.airesSansProgramme > 0,
+            actionBad: "Planifier immédiatement",
+            actionOk: "Toutes les aires sont planifiées",
+          },
         ];
         return (
           <div className="space-y-4">
@@ -108,18 +129,26 @@ export default function SynthesePage() {
               <Card>
                 <div className="card-title mb-2">Alertes clés automatiques</div>
                 <table className="dtable">
-                  <thead><tr><th className="name">Alerte</th><th>Seuil</th><th>Valeur</th><th>Action</th></tr></thead>
+                  <thead><tr><th className="name">Indicateur</th><th>Seuil d'alerte</th><th>Valeur</th><th>Statut</th><th>Action recommandée</th></tr></thead>
                   <tbody>
                     {alerts.map((a) => (
                       <tr key={a.sit}>
                         <td className="name">{a.sit}</td>
                         <td>{a.seuil}</td>
                         <td style={{ fontWeight: 800, color: a.bad ? "#c81e1e" : "#178a44" }}>{a.val}</td>
-                        <td style={{ textAlign: "left" }}>{a.action}</td>
+                        <td>
+                          <span className="badge-appr" style={{ background: a.bad ? "#fff1f1" : "#eafaf1", color: a.bad ? "#c81e1e" : "#178a44" }}>
+                            {a.bad ? "⚠ Alerte" : "✓ Conforme"}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: "left" }}>{a.bad ? a.actionBad : a.actionOk}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+                <div className="mt-2 text-[11.5px] text-surface-700">
+                  Une ligne passe en <b style={{ color: "#c81e1e" }}>Alerte</b> seulement quand son seuil est franchi ; l'action affichée s'adapte alors au statut. Sinon l'indicateur est <b style={{ color: "#178a44" }}>Conforme</b> et aucune action corrective n'est requise.
+                </div>
               </Card>
             </section>
 
