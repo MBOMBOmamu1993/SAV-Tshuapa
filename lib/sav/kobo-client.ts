@@ -54,10 +54,27 @@ function readSheets(buf: ArrayBuffer): Record<string, RawRow[]> {
   return out;
 }
 
-/** Sépare la feuille « parent » (la plus large) de la sous-feuille répétée. */
+/**
+ * Sépare la feuille « parent » de la sous-feuille répétée (enfants / sessions).
+ *
+ * La détection se fait sur les **colonnes de lien Kobo** (`_parent_table_name`,
+ * `_parent_index`, `_submission__*`) que seule la sous-feuille porte — et NON
+ * sur le nom de la feuille : le classeur de planification a un parent nommé
+ * « SAV_Planification **session** de… », dont le nom contient « session » et
+ * piégeait l'ancienne heuristique (parent/enfant inversés → planification à 0).
+ * Le nom (`childName`) ne sert que de repli si aucune colonne de lien n'est vue.
+ */
 function splitSheets(sheets: Record<string, RawRow[]>, childName: string): { parents: RawRow[]; children: RawRow[] } {
   const names = Object.keys(sheets);
-  const child = names.find((nm) => nm.toLowerCase().includes(childName)) ?? null;
+  if (names.length <= 1) return { parents: sheets[names[0]] ?? [], children: [] };
+  const colsOf = (nm: string): string[] => {
+    const rows = sheets[nm] ?? [];
+    return rows.length ? Object.keys(rows[0]) : [];
+  };
+  const looksLikeChild = (nm: string): boolean =>
+    colsOf(nm).some((c) => c === "_parent_table_name" || c === "_parent_index" || c.startsWith("_submission__"));
+  let child = names.find(looksLikeChild) ?? null;
+  if (!child) child = names.find((nm) => nm.toLowerCase().includes(childName)) ?? null;
   const parentName = names.find((nm) => nm !== child) ?? names[0];
   return { parents: sheets[parentName] ?? [], children: child ? sheets[child] ?? [] : [] };
 }
