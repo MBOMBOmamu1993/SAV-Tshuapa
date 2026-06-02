@@ -165,10 +165,10 @@ export function buildSavDeck(b: SavBundle, period: string): Deck {
     tableTitle: "Aires de santé sans programme (à planifier)",
     tableCols: ["Aire de santé", "Zone", "Identifiés"],
     tableRows: sansProg.length ? sansProg.map((a) => row(a.aire, a.zone ?? "—", String(a.identifies))) : [row("Toutes les AS sont planifiées", "—", "—")],
-    chartTitle: "Sessions prévues par type",
+    chartTitle: `Sessions prévues par type — AS avec / sans programme : ${k.airesPlanifiees} / ${k.airesSansProgramme}`,
     bars: [
-      { l: "Fixe", v: b.planif.sessionsParType.fixe, c: P.bleu },
       { l: "Avancée", v: b.planif.sessionsParType.avancee, c: P.vert },
+      { l: "Fixe", v: b.planif.sessionsParType.fixe, c: P.bleu },
       { l: "Mobile", v: b.planif.sessionsParType.mobile, c: P.jaune },
     ],
     chartOpt: { max: Math.max(5, b.planif.totalSessions) },

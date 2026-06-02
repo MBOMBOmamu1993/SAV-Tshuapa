@@ -20,10 +20,10 @@ export default function SupervisionPage() {
             <section>
               <SectionBar icon="shield">Indicateurs de supervision des équipes</SectionBar>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-                <KpiCard icon="clipboard" tone="navy" label="Visites de supervision" value={fmtNum(s.visites)} sub={`${s.sites} sites distincts`} />
-                <KpiCard icon="up" tone={cot === "faible" ? "bad" : "good"} label="Score qualité moyen" value={fmtPct(s.scoreMoyen)} sub="Réponses « Oui » / applicables" />
-                <KpiCard icon="trophy" tone="brand" label="Appréciation globale" value={cot ? COTATION_LABEL[cot] : "—"} sub="Selon le score qualité" />
-                <KpiCard icon="alert" tone={s.difficultes.length ? "warn" : "good"} label="Difficultés signalées" value={fmtNum(s.difficultes.reduce((a, x) => a + x.count, 0))} sub="Toutes catégories" />
+                <KpiCard icon="report" tone="navy" label="Visites de supervision" value={fmtNum(s.visites)} sub={`${s.sites} sites distincts`} />
+                <KpiCard icon="recovery" tone={cot === "faible" ? "bad" : "good"} label="Score qualité moyen" value={fmtPct(s.scoreMoyen)} sub="Réponses « Oui » / applicables" />
+                <KpiCard icon="target" tone="brand" label="Appréciation globale" value={cot ? COTATION_LABEL[cot] : "—"} sub="Selon le score qualité" />
+                <KpiCard icon="zeroDose" tone={s.difficultes.length ? "warn" : "good"} label="Difficultés signalées" value={fmtNum(s.difficultes.reduce((a, x) => a + x.count, 0))} sub="Toutes catégories" />
               </div>
             </section>
 

@@ -9,7 +9,7 @@ import {
 import { canonAntenne, dedupeLabels, eqGeo, norm } from "@/lib/geo";
 import type {
   SavSeed, IdentRecord, PlanRecord, ResultRecord, SupervRecord,
-  SavBundle, AntigenStat, GeoMissedRow, PlanAireRow, ResultGeoRow, SupervBundle,
+  SavBundle, AntigenStat, GeoMissedRow, PlanAireRow, PlanSessionDetail, ResultGeoRow, SupervBundle,
 } from "./types";
 
 export interface Filters {
@@ -35,6 +35,43 @@ function matches(r: GeoLike, f: Filters): boolean {
   if (f.aire && !eqGeo(r.aire, f.aire)) return false;
   if (f.months && f.months.length && !(r.month && f.months.includes(r.month))) return false;
   return true;
+}
+
+/* --------------------------- Déduplication (spec 01) --------------------------- */
+/** Clé d'unicité d'une aire : zone + aire normalisées (évite les collisions
+ *  d'aires homonymes situées dans deux zones différentes). */
+function aireKey(r: { zone: string | null; aire: string | null }): string {
+  return `${norm(r.zone ?? "")}|${norm(r.aire ?? "")}`;
+}
+
+/**
+ * Conserve un seul enregistrement par aire de santé = le plus RÉCENT (champ
+ * `date`) ; à date égale, le plus « complet » (selon `sizeOf`).
+ * Utilisé pour identCs, identRelais et planif (PAS pour resultats ni superv).
+ */
+function dedupeByAire<T extends { zone: string | null; aire: string | null; date: string | null }>(
+  records: T[],
+  sizeOf: (r: T) => number,
+): T[] {
+  const best = new Map<string, T>();
+  for (const r of records) {
+    const k = aireKey(r);
+    if (!k || k === "|") continue;
+    const cur = best.get(k);
+    if (!cur) { best.set(k, r); continue; }
+    const dNew = r.date ?? "";
+    const dCur = cur.date ?? "";
+    if (dNew > dCur || (dNew === dCur && sizeOf(r) > sizeOf(cur))) best.set(k, r);
+  }
+  return Array.from(best.values());
+}
+
+/** Type de session normalisé depuis la sous-feuille `sessions` (spec 02). */
+function sessionType(t: string | null): "avancee" | "mobile" | "fixe" {
+  const x = (t ?? "").toLowerCase();
+  if (x.includes("avanc")) return "avancee";
+  if (x.includes("mobile")) return "mobile";
+  return "fixe"; // "Fixe", "Autre"/précisé, vide
 }
 
 /* --------------------------- Identification --------------------------- */
@@ -165,9 +202,12 @@ function buildSuperv(records: SupervRecord[]): SupervBundle {
 /* ------------------------------ Bundle ------------------------------ */
 export function buildBundle(data: SavSeed, filters: Filters, meta: { live: boolean; generatedAt: string }): SavBundle {
   const f = filters;
-  const identCs = data.identCs.filter((r) => matches(r, f));
-  const identRel = data.identRelais.filter((r) => matches(r, f));
-  const planif = data.planif.filter((r) => matches(r, f));
+  // Déduplication (spec 01) : 1 seul formulaire par aire de santé pour
+  // l'identification (CS/relais) et la planification. Résultats et supervision
+  // ne sont PAS dédupliqués (plusieurs sessions/visites par aire sont légitimes).
+  const identCs = dedupeByAire(data.identCs.filter((r) => matches(r, f)), (r) => r.enfants.length);
+  const identRel = dedupeByAire(data.identRelais.filter((r) => matches(r, f)), (r) => r.enfants.length);
+  const planif = dedupeByAire(data.planif.filter((r) => matches(r, f)), (r) => r.sessionsPlan);
   const resultats = data.resultats.filter((r) => matches(r, f));
   const superv = data.superv.filter((r) => matches(r, f));
 
@@ -245,7 +285,39 @@ export function buildBundle(data: SavSeed, filters: Filters, meta: { live: boole
   const totalAvancees = planif.reduce((s, r) => s + r.avancees, 0);
   const totalMobiles = planif.reduce((s, r) => s + r.mobiles, 0);
   const totalAttendus = planif.reduce((s, r) => s + r.attendus, 0);
-  const sessFixe = Math.max(0, totalSessions - totalAvancees - totalMobiles);
+
+  // Sessions par type (spec 02) : agréger directement depuis la sous-feuille
+  // `sessions` (champ « Type de session ») pour ne dépendre d'aucun champ
+  // calculé Kobo. Repli sur les champs parents si pas de sous-feuille.
+  let sAv = 0, sMo = 0, sFx = 0;
+  for (const p of planif) {
+    if (p.sessions.length) {
+      for (const ss of p.sessions) {
+        const t = sessionType(ss.type);
+        if (t === "avancee") sAv++; else if (t === "mobile") sMo++; else sFx++;
+      }
+    } else {
+      sAv += p.avancees; sMo += p.mobiles;
+      sFx += Math.max(0, p.sessionsPlan - p.avancees - p.mobiles);
+    }
+  }
+
+  // Détail des sessions planifiées (table « détail des sessions », spec 03).
+  const sessionDetails: PlanSessionDetail[] = [];
+  for (const p of planif) {
+    for (const ss of p.sessions) {
+      const typeKey = sessionType(ss.type);
+      sessionDetails.push({
+        aire: p.aire ?? "—", zone: p.zone, n: ss.n,
+        date: ss.date, type: ss.type,
+        typeLabel: typeKey === "avancee" ? "Avancée" : typeKey === "mobile" ? "Mobile" : "Fixe",
+        lieu: ss.lieu, attendus: ss.attendus,
+      });
+    }
+  }
+  sessionDetails.sort((a, b) =>
+    (a.date ?? "").localeCompare(b.date ?? "") || a.aire.localeCompare(b.aire) || a.n - b.n,
+  );
 
   // KPI synthèse.
   const kpi = {
@@ -298,7 +370,8 @@ export function buildBundle(data: SavSeed, filters: Filters, meta: { live: boole
     planif: {
       aires: planAires,
       proportionAvecProgramme: pct(airesAvecProg, planAires.length),
-      sessionsParType: { fixe: sessFixe, avancee: totalAvancees, mobile: totalMobiles },
+      sessionsParType: { fixe: sFx, avancee: sAv, mobile: sMo },
+      sessionDetails,
       totalSessions, totalAttendus,
     },
     resultats: {

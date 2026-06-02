@@ -134,6 +134,19 @@ export interface PlanAireRow {
   ratio: number | null;
 }
 
+export interface PlanSessionDetail {
+  aire: string;
+  zone: string | null;
+  n: number;
+  date: string | null;
+  /** Type brut (« Type de session » Kobo). */
+  type: string | null;
+  /** Type normalisé pour l'affichage : Avancée / Mobile / Fixe. */
+  typeLabel: string;
+  lieu: string | null;
+  attendus: number;
+}
+
 export interface ResultGeoRow {
   name: string;
   zone?: string | null;
@@ -212,6 +225,7 @@ export interface SavBundle {
     aires: PlanAireRow[];
     proportionAvecProgramme: number | null;
     sessionsParType: { fixe: number; avancee: number; mobile: number };
+    sessionDetails: PlanSessionDetail[];
     totalSessions: number;
     totalAttendus: number;
   };
